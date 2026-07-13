@@ -13,18 +13,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Install python dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY requirements.txt ./backend/
+RUN pip install --no-cache-dir -r backend/requirements.txt
 
 # Install Playwright browser and system-level browser dependencies
 RUN playwright install chromium
 RUN playwright install-deps chromium
 
 # Copy codebase
-COPY . .
+COPY . ./backend/
 
 # Expose port
 EXPOSE 8000
 
 # Start app
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
