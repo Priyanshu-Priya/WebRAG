@@ -5,7 +5,11 @@ from urllib.parse import urlparse, urljoin, urldefrag
 from typing import AsyncGenerator, Set, Dict, Any, List
 import httpx
 from bs4 import BeautifulSoup
-from playwright.async_api import async_playwright
+try:
+    from playwright.async_api import async_playwright
+    HAS_PLAYWRIGHT = True
+except ImportError:
+    HAS_PLAYWRIGHT = False
 
 logger = logging.getLogger(__name__)
 
@@ -146,21 +150,30 @@ class WebCrawler:
                     text_len = len(soup.get_text().strip())
                     
                     # If page is empty or looks like a JS client app wrapper
-                    if text_len < 150 or "javascript is required" in text.lower():
+                    if (text_len < 150 or "javascript is required" in text.lower()) and HAS_PLAYWRIGHT:
                         html_content = await self._fetch_with_playwright(current_url)
                     else:
                         html_content = text
 
                 except Exception as e:
-                    logger.warning(f"Failed standard HTTP load for {current_url}: {e}. Retrying with Playwright...")
-                    try:
-                        # Fallback to Playwright directly on standard fetch failure (SSL errors, timeouts, etc.)
-                        html_content = await self._fetch_with_playwright(current_url)
-                    except Exception as pe:
-                        logger.error(f"Playwright fallback also failed for {current_url}: {pe}")
+                    logger.warning(f"Failed standard HTTP load for {current_url}: {e}")
+                    if HAS_PLAYWRIGHT:
+                        try:
+                            logger.info(f"Retrying with Playwright for {current_url}...")
+                            html_content = await self._fetch_with_playwright(current_url)
+                        except Exception as pe:
+                            logger.error(f"Playwright fallback also failed for {current_url}: {pe}")
+                            yield {
+                                "event": "error",
+                                "message": f"Failed to retrieve {current_url}: {str(pe)}",
+                                "url": current_url
+                            }
+                            continue
+                    else:
+                        logger.error(f"Cannot fetch {current_url} (Playwright not installed)")
                         yield {
                             "event": "error",
-                            "message": f"Failed to retrieve {current_url}: {str(pe)}",
+                            "message": f"Failed to retrieve {current_url}: {str(e)}",
                             "url": current_url
                         }
                         continue

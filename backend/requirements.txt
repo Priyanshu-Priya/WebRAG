@@ -11,6 +11,7 @@ langchain-community>=0.0.28
 langchain-core>=0.1.30
 langchain-groq>=0.1.0
 langchain-openai>=0.1.0
-sentence-transformers>=2.5.1
+huggingface_hub>=0.21.0
 chromadb>=0.4.24
 apscheduler>=3.10.4
+

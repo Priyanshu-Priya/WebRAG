@@ -1,0 +1,4 @@
+# Local development requirements (includes heavy ML packages for local CPU embeddings)
+# Use this file for local development: pip install -r requirements-local.txt
+-r requirements.txt
+sentence-transformers>=2.5.1

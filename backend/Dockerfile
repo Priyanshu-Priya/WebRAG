@@ -6,7 +6,7 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-# Install system dependencies needed for compiling python packages or browser runtimes
+# Install system dependencies needed for compiling python packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     curl \
@@ -16,9 +16,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY requirements.txt ./backend/
 RUN pip install --no-cache-dir -r backend/requirements.txt
 
-# Install Playwright browser and system-level browser dependencies
-RUN playwright install chromium
-RUN playwright install-deps chromium
+# Remove heavy packages that are not needed for cloud-based embeddings
+# onnxruntime is installed by chromadb but unused (we provide our own embeddings)
+# This saves ~300MB of RAM at startup
+RUN pip uninstall -y onnxruntime 2>/dev/null || true
 
 # Copy codebase
 COPY . ./backend/
