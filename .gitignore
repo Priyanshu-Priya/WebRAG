@@ -1,0 +1,29 @@
+# Environment Variables
+.env
+
+# Python Virtual Environment
+venv/
+.venv/
+env/
+
+# Python caching
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Database and SQLite / ChromaDB storage
+data/
+*.db
+*.sqlite
+
+# Frontend Node packages and builds
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Editor and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
