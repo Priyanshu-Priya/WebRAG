@@ -4,6 +4,14 @@ WebRAG is a production-quality, Retrieval-Augmented Generation (RAG) platform th
 
 ---
 
+## Live Deployment
+
+- **Frontend (Live Demo)**: [https://webrag-frontend.onrender.com](https://webrag-frontend.onrender.com)
+- **Backend (API Service)**: [https://webrag-zkg6.onrender.com](https://webrag-zkg6.onrender.com)
+  *Note: The backend service is hosted on an instance that spins down when idle, so it may require up to 50 seconds for a cold start if it has not been accessed recently.*
+
+---
+
 ## Features
 
 - **Dynamic Crawling & JS Support**: Standard web scrapers with automatic headless browser fallback (Playwright) for JS-heavy client apps.
