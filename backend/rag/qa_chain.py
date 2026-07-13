@@ -87,7 +87,7 @@ class QAChainManager:
         except Exception as e:
             logger.error(f"Error searching ChromaDB collection {collection_id}: {e}")
             return {
-                "answer": "I couldn't retrieve context from this collection because the index is empty or has not been built yet.",
+                "answer": f"I couldn't retrieve context from this collection. Error: {str(e)}",
                 "sources": []
             }
 
