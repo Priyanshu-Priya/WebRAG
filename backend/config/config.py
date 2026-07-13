@@ -11,6 +11,8 @@ class Settings:
     
     # API Keys
     GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", "")
+    OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
+    HF_TOKEN: str = os.getenv("HF_TOKEN", os.getenv("HUGGINGFACEHUB_API_TOKEN", ""))
     
     # LLM Settings
     LLM_MODEL: str = os.getenv("LLM_MODEL", "llama-3.3-70b-specdec")
