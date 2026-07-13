@@ -28,7 +28,7 @@ class Settings:
     # Crawler Settings
     CRAWL_MAX_DEPTH: int = int(os.getenv("CRAWL_MAX_DEPTH", "2"))
     CRAWL_MAX_PAGES: int = int(os.getenv("CRAWL_MAX_PAGES", "20"))
-    CRAWL_USER_AGENT: str = os.getenv("CRAWL_USER_AGENT", "WebRAG-Bot/1.0 (+http://localhost)")
+    CRAWL_USER_AGENT: str = os.getenv("CRAWL_USER_AGENT", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
     
     # Scheduler Settings
     REFRESH_INTERVAL_HOURS: int = int(os.getenv("REFRESH_INTERVAL_HOURS", "6"))

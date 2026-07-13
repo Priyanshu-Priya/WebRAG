@@ -63,7 +63,21 @@ class WebCrawler:
 
     async def _fetch_with_httpx(self, client: httpx.AsyncClient, url: str) -> tuple[int, str, Dict[str, str]]:
         """Performs a fast HTTP request."""
-        headers = {"User-Agent": self.user_agent}
+        headers = {
+            "User-Agent": self.user_agent,
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Accept-Encoding": "gzip, deflate, br",
+            "Connection": "keep-alive",
+            "Upgrade-Insecure-Requests": "1",
+            "Sec-Ch-UA": '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
+            "Sec-Ch-UA-Mobile": "?0",
+            "Sec-Ch-UA-Platform": '"Windows"',
+            "Sec-Fetch-Dest": "document",
+            "Sec-Fetch-Mode": "navigate",
+            "Sec-Fetch-Site": "none",
+            "Sec-Fetch-User": "?1",
+        }
         response = await client.get(url, headers=headers, timeout=self.timeout_seconds, follow_redirects=True)
         return response.status_code, response.text, dict(response.headers)
 
