@@ -1,11 +1,19 @@
 import axios from "axios";
 
-const API_BASE_URL = window.location.origin.includes("localhost") 
-  ? "http://localhost:8000/api" 
-  : "/api";
+// In production, set VITE_API_URL in Render env vars (e.g., https://webrag-zkg6.onrender.com/api)
+const API_BASE_URL = import.meta.env.VITE_API_URL || (
+  window.location.origin.includes("localhost") 
+    ? "http://localhost:8000/api" 
+    : "/api"
+);
 
 export const getWsUrl = (collectionId) => {
   const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+  if (import.meta.env.VITE_API_URL) {
+    // Extract host from VITE_API_URL (e.g., "https://webrag-zkg6.onrender.com/api" -> "webrag-zkg6.onrender.com")
+    const backendHost = new URL(import.meta.env.VITE_API_URL).host;
+    return `${protocol}//${backendHost}/api/ws/${collectionId}`;
+  }
   if (window.location.origin.includes("localhost")) {
     return `${protocol}//localhost:8000/api/ws/${collectionId}`;
   }
