@@ -24,6 +24,12 @@ Conversation History:
 Context:
 {context}
 
+---
+CRITICAL CITATION RULES:
+- Every factual statement or sentence in your response MUST end with an inline citation bracket matching the Document Chunk index (e.g., [1], [2], or [1][3]).
+- Do not make any statements without citing their source chunk.
+- Do not combine citations (e.g. write [1][2] instead of [1, 2]).
+
 Question: {question}
 
 Answer:"""
