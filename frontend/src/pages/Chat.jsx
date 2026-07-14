@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
-import { MessageSquare, Send, BookOpen, ExternalLink, Bot, User, Trash2, Loader, Eye, X } from "lucide-react";
+import { MessageSquare, Send, BookOpen, ExternalLink, Bot, User, Trash2, Loader, Eye, X, ChevronLeft } from "lucide-react";
 import apiService from "../api/api";
 
 export default function Chat() {
@@ -24,6 +24,9 @@ export default function Chat() {
 
   const messagesEndRef = useRef(null);
 
+  // Responsive state
+  const [mobileActiveView, setMobileActiveView] = useState("list");
+
   useEffect(() => {
     fetchCollections();
   }, []);
@@ -32,10 +35,10 @@ export default function Chat() {
     if (activeColId && collections.length > 0) {
       const selected = collections.find(c => c.id === parseInt(activeColId));
       if (selected) {
-        handleSelectCollection(selected);
+        handleSelectCollection(selected, false, true);
       }
     } else if (collections.length > 0 && !selectedCol) {
-      handleSelectCollection(collections[0]);
+      handleSelectCollection(collections[0], false, false);
     }
   }, [activeColId, collections]);
 
@@ -55,11 +58,15 @@ export default function Chat() {
     }
   };
 
-  const handleSelectCollection = async (col) => {
+  const handleSelectCollection = async (col, isExplicitClick = false, forceView = false) => {
     setSelectedCol(col);
     setSearchParams({ collection: col.id });
     setMessages([]);
     setIsLoading(true);
+    
+    if (isExplicitClick || forceView) {
+      setMobileActiveView("chat");
+    }
 
     try {
       // Load previous chat history
@@ -170,9 +177,11 @@ export default function Chat() {
   };
 
   return (
-    <div className="h-full flex bg-dark-950 overflow-hidden">
+    <div className="h-full flex bg-dark-950 overflow-hidden w-full">
       {/* Left panel: Collection selector */}
-      <div className="w-64 border-r border-dark-800 bg-dark-900/60 flex flex-col">
+      <div className={`w-full md:w-64 border-r border-dark-800 bg-dark-900/60 flex flex-col shrink-0 h-full ${
+        mobileActiveView === "chat" ? "hidden md:flex" : "flex"
+      }`}>
         <div className="p-4 border-b border-dark-800">
           <h2 className="text-sm font-bold text-dark-300 uppercase tracking-wider flex items-center space-x-2">
             <MessageSquare className="h-4 w-4 text-brand-400" />
@@ -185,7 +194,7 @@ export default function Chat() {
           {collections.map((col) => (
             <button
               key={col.id}
-              onClick={() => handleSelectCollection(col)}
+              onClick={() => handleSelectCollection(col, true)}
               className={`w-full text-left px-3 py-2.5 rounded-lg text-sm font-semibold transition border ${
                 selectedCol?.id === col.id
                   ? "bg-brand-600/10 border-brand-500/50 text-white"
@@ -202,17 +211,27 @@ export default function Chat() {
       </div>
 
       {/* Main chat window */}
-      <div className="flex-1 flex flex-col bg-dark-950">
+      <div className={`flex-1 flex flex-col bg-dark-950 h-full overflow-hidden ${
+        mobileActiveView === "list" ? "hidden md:flex" : "flex"
+      }`}>
         {selectedCol ? (
           <>
             {/* Header info */}
-            <div className="px-6 py-4 bg-dark-900 border-b border-dark-800 flex items-center justify-between">
-              <div>
-                <h3 className="font-bold text-white text-sm">Grounded QA Chatbot</h3>
-                <p className="text-xs text-dark-400">Context namespace: <span className="text-brand-400 font-mono">{selectedCol.name}</span></p>
+            <div className="px-4 sm:px-6 py-4 bg-dark-900 border-b border-dark-800 flex items-center justify-between">
+              <div className="flex items-center space-x-3 min-w-0">
+                <button
+                  onClick={() => setMobileActiveView("list")}
+                  className="md:hidden p-1.5 rounded-lg bg-dark-800 border border-dark-700 text-dark-300 hover:text-white transition shrink-0"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <div className="min-w-0">
+                  <h3 className="font-bold text-white text-sm">Grounded QA Chatbot</h3>
+                  <p className="text-xs text-dark-400 truncate">Context: <span className="text-brand-400 font-mono">{selectedCol.name}</span></p>
+                </div>
               </div>
-              <div className="rounded-full bg-brand-500/10 border border-brand-500/30 px-3 py-1 text-[11px] font-bold text-brand-400 uppercase tracking-wider">
-                RAG Shield Active
+              <div className="rounded-full bg-brand-500/10 border border-brand-500/30 px-2.5 py-1 text-[10px] sm:text-[11px] font-bold text-brand-400 uppercase tracking-wider shrink-0">
+                RAG Active
               </div>
             </div>
 

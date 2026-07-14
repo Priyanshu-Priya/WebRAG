@@ -95,7 +95,7 @@ export default function Search() {
         {/* Main results panel */}
         <div className="lg:col-span-3 space-y-4">
           {/* Query Bar */}
-          <form onSubmit={handleSearch} className="flex items-center space-x-2">
+          <form onSubmit={handleSearch} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
             <div className="relative flex-1">
               <SearchIcon className="absolute left-3.5 top-3.5 h-4.5 w-4.5 text-dark-500" />
               <input

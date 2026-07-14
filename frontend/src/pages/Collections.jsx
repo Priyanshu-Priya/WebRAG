@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Folder, Plus, Trash2, Globe, RefreshCw, Terminal, ExternalLink, Play, CheckCircle2, AlertCircle, X, ChevronRight } from "lucide-react";
+import { Folder, Plus, Trash2, Globe, RefreshCw, Terminal, ExternalLink, Play, CheckCircle2, AlertCircle, X, ChevronRight, ChevronLeft } from "lucide-react";
 import apiService, { getWsUrl } from "../api/api";
 
 export default function Collections() {
@@ -23,6 +23,9 @@ export default function Collections() {
   const wsRef = useRef(null);
   const logTerminalEndRef = useRef(null);
 
+  // Responsive state
+  const [mobileActiveView, setMobileActiveView] = useState("list");
+
   useEffect(() => {
     fetchCollections();
   }, []);
@@ -31,10 +34,28 @@ export default function Collections() {
     if (viewId && collections.length > 0) {
       const selected = collections.find(c => c.id === parseInt(viewId));
       if (selected) {
-        handleSelectCollection(selected);
+        setSelectedCol(selected);
+        // Reset indexing / logs if shifting collections
+        if (wsRef.current) {
+          wsRef.current.close();
+          wsRef.current = null;
+        }
+        setWsLogs([]);
+        setCrawlProgress(0);
+        setIsIndexing(selected.status === "Indexing");
+
+        if (selected.status === "Indexing") {
+          connectWebSocket(selected.id);
+        }
+        setMobileActiveView("detail"); // Deep link should show detail
       }
     } else if (collections.length > 0 && !selectedCol) {
-      handleSelectCollection(collections[0]);
+      const firstCol = collections[0];
+      setSelectedCol(firstCol);
+      setIsIndexing(firstCol.status === "Indexing");
+      if (firstCol.status === "Indexing") {
+        connectWebSocket(firstCol.id);
+      }
     }
   }, [viewId, collections]);
 
@@ -63,7 +84,7 @@ export default function Collections() {
     }
   };
 
-  const handleSelectCollection = (col) => {
+  const handleSelectCollection = (col, isExplicitClick = false) => {
     setSelectedCol(col);
     setSearchParams({ view: col.id });
     
@@ -78,6 +99,10 @@ export default function Collections() {
 
     if (col.status === "Indexing") {
       connectWebSocket(col.id);
+    }
+
+    if (isExplicitClick) {
+      setMobileActiveView("detail");
     }
   };
 
@@ -216,9 +241,11 @@ export default function Collections() {
   };
 
   return (
-    <div className="h-full flex bg-dark-950 overflow-hidden">
+    <div className="h-full flex bg-dark-950 overflow-hidden w-full">
       {/* Sidebar List */}
-      <div className="w-80 border-r border-dark-800 bg-dark-900/60 flex flex-col justify-between">
+      <div className={`w-full lg:w-80 border-r border-dark-800 bg-dark-900/60 flex flex-col justify-between shrink-0 h-full ${
+        mobileActiveView === "detail" ? "hidden lg:flex" : "flex"
+      }`}>
         <div className="p-4 border-b border-dark-800 flex items-center justify-between">
           <h2 className="text-lg font-bold text-white flex items-center space-x-2">
             <Folder className="h-5 w-5 text-brand-400" />
@@ -240,7 +267,7 @@ export default function Collections() {
             collections.map((col) => (
               <button
                 key={col.id}
-                onClick={() => handleSelectCollection(col)}
+                onClick={() => handleSelectCollection(col, true)}
                 className={`w-full text-left p-3 rounded-lg flex items-center justify-between border transition ${
                   selectedCol?.id === col.id
                     ? "bg-brand-600/10 border-brand-500/50 text-white"
@@ -263,32 +290,42 @@ export default function Collections() {
       </div>
 
       {/* Main Details Panel */}
-      <div className="flex-1 overflow-y-auto p-6 flex flex-col justify-between">
+      <div className={`flex-1 overflow-y-auto p-6 flex flex-col justify-between h-full ${
+        mobileActiveView === "list" ? "hidden lg:flex" : "flex"
+      }`}>
         {selectedCol ? (
           <div className="space-y-6">
             {/* Title / Action Header */}
-            <div className="flex items-center justify-between pb-5 border-b border-dark-800">
-              <div>
-                <h1 className="text-2xl font-bold text-white">{selectedCol.name}</h1>
-                <p className="text-dark-400 text-sm mt-1">
-                  Status: 
-                  <span className={`ml-1.5 font-bold ${
-                    selectedCol.status === "Ready" ? "text-emerald-400" :
-                    selectedCol.status === "Indexing" ? "text-brand-400" :
-                    selectedCol.status === "Failed" ? "text-rose-400" :
-                    "text-dark-300"
-                  }`}>
-                    {selectedCol.status}
-                  </span>
-                  {selectedCol.last_indexed && (
-                    <span className="ml-4 font-normal text-dark-500">
-                      Last Indexed: {new Date(selectedCol.last_indexed).toLocaleString()}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-5 border-b border-dark-800 gap-4">
+              <div className="flex items-center space-x-3">
+                <button
+                  onClick={() => setMobileActiveView("list")}
+                  className="lg:hidden p-1.5 rounded-lg bg-dark-800 border border-dark-700 text-dark-300 hover:text-white transition shrink-0"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <div>
+                  <h1 className="text-2xl font-bold text-white truncate max-w-[200px] sm:max-w-xs">{selectedCol.name}</h1>
+                  <p className="text-dark-400 text-sm mt-1 flex flex-wrap items-center">
+                    <span>Status: </span>
+                    <span className={`ml-1.5 font-bold ${
+                      selectedCol.status === "Ready" ? "text-emerald-400" :
+                      selectedCol.status === "Indexing" ? "text-brand-400" :
+                      selectedCol.status === "Failed" ? "text-rose-400" :
+                      "text-dark-300"
+                    }`}>
+                      {selectedCol.status}
                     </span>
-                  )}
-                </p>
+                    {selectedCol.last_indexed && (
+                      <span className="block sm:inline sm:ml-4 font-normal text-dark-500 text-xs sm:text-sm">
+                        Last Indexed: {new Date(selectedCol.last_indexed).toLocaleString()}
+                      </span>
+                    )}
+                  </p>
+                </div>
               </div>
 
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-3 shrink-0 self-end sm:self-auto">
                 <button
                   disabled={isIndexing}
                   onClick={handleStartIndexing}

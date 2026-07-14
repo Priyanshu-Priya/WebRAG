@@ -65,14 +65,14 @@ export default function Dashboard() {
 
   return (
     <div className="h-full overflow-y-auto bg-dark-950 p-6">
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-white">System Dashboard</h1>
           <p className="text-dark-400 text-sm">Real-time status overview of WebRAG collections and engines.</p>
         </div>
         <button 
           onClick={fetchData} 
-          className="flex items-center space-x-2 rounded-lg bg-dark-900 border border-dark-700 px-4 py-2 text-sm text-dark-200 transition hover:bg-dark-800 hover:text-white"
+          className="flex items-center space-x-2 rounded-lg bg-dark-900 border border-dark-700 px-4 py-2 text-sm text-dark-200 transition hover:bg-dark-800 hover:text-white shrink-0 self-start sm:self-auto"
         >
           <RefreshCw className="h-4 w-4" />
           <span>Refresh Stats</span>
